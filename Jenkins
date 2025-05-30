@@ -1,9 +1,15 @@
 pipeline {
-    agent any  // Use any available agent
+    agent any  // Use any available Jenkins agent
 
     tools {
-        maven 'Maven'  // Ensure this matches the name configured in Jenkins
+        maven 'Maven'  // Make sure 'Maven' is configured in Jenkins Global Tool Configuration
     }
+
+    environment {
+        // Set your artifact name here; must match what's defined in the POM (artifactId-version)
+        ARTIFACT_NAME = 'MyMavenApp-1.0-SNAPSHOT.jar'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -13,35 +19,31 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'  // Run Maven build
+                sh 'mvn clean package'  // Build the Maven project
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'  // Run unit tests
+                sh 'mvn test'  // Run tests
             }
         }
 
-        
-        
-       
         stage('Run Application') {
             steps {
-                // Start the JAR application
-                sh 'java -jar target/MyMavenApp5-1.0-SNAPSHOT.jar'
+                // Run the built jar if it exists
+                sh 'ls -l target'  // Debug output: list contents of target directory
+                sh "java -jar target/${ARTIFACT_NAME}"  // Run the built JAR
             }
         }
-
-        
     }
 
     post {
         success {
-            echo 'Build and deployment successful!'
+            echo '✅ Build and deployment successful!'
         }
         failure {
-            echo 'Build failed!'
+            echo '❌ Build failed!'
         }
     }
 }
